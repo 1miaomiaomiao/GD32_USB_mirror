@@ -1,0 +1,23 @@
+clean2:
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(C_UPPER_DEPS)$(CXX_DEPS)$(SECONDARY_FLASH)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS)$(CPP_DEPS)
+	-$(RM) $(OBJS) *.elf
+	-@echo ' '
+
+LINK_RSP = rtthread.objs.rsp
+LINK_ALL = $(OBJS) $(USER_OBJS) $(LIBS)
+
+rtthread.elf: $(OBJS) $(USER_OBJS)
+	@echo build response file $(LINK_RSP)
+	@echo $(wordlist 1,200,$(LINK_ALL)) > $(LINK_RSP)
+	@echo $(wordlist 201,400,$(LINK_ALL)) >> $(LINK_RSP)
+	@echo $(wordlist 401,600,$(LINK_ALL)) >> $(LINK_RSP)
+	@echo $(wordlist 601,800,$(LINK_ALL)) >> $(LINK_RSP)
+	@echo $(wordlist 801,1000,$(LINK_ALL)) >> $(LINK_RSP)
+	@echo $(wordlist 1001,1200,$(LINK_ALL)) >> $(LINK_RSP)
+	@echo $(wordlist 1201,1400,$(LINK_ALL)) >> $(LINK_RSP)
+	@echo $(wordlist 1401,1600,$(LINK_ALL)) >> $(LINK_RSP)
+	@echo $(wordlist 1601,1800,$(LINK_ALL)) >> $(LINK_RSP)
+	@echo $(wordlist 1801,2000,$(LINK_ALL)) >> $(LINK_RSP)
+	arm-none-eabi-gcc -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16 -O0 -ffunction-sections -fdata-sections -Wall -g -gdwarf-2 -T "D:\RT-ThreadStudio\workspace\GD32\linkscripts\GD32H759IM\link.ld" -Xlinker --gc-sections -Wl,-Map,"rtthread.map" -Xlinker --cref -o "rtthread.elf" @$(LINK_RSP)
+
+*.elf: $(wildcard ../linkscripts/GD32H759IM/link.ld)

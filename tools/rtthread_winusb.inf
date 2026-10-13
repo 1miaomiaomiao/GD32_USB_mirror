@@ -1,0 +1,62 @@
+;
+; rtthread_winusb.inf -- bind Windows' inbox WinUSB driver to the
+; GD32 USB secondary display device (VID_28E9&PID_028F).
+;
+; The firmware already exposes Microsoft OS v1 compatible-ID descriptors
+; ("WINUSB"), so on a fresh machine Windows 10/11 auto-loads winusb.sys
+; with no driver at all. This INF is the fallback for a machine whose
+; device node was cached before the firmware answered those descriptors
+; (Device Manager shows "RTT Win USB" with a yellow bang, Problem Code 28).
+;
+; It contains NO driver binaries: it only references Microsoft's inbox
+; winusb.inf, so it needs no catalog/signature of its own.
+;
+; Install (elevated):  pnputil /add-driver rtthread_winusb.inf /install
+;
+[Version]
+Signature   = "$Windows NT$"
+Class       = USBDevice
+ClassGuid   = {88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider    = %ProviderName%
+DriverVer   = 09/06/2026,1.0.0.0
+PnpLockdown = 1
+
+[ClassInstall32]
+Addreg = WinUSBDeviceClassReg
+
+[WinUSBDeviceClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-20
+
+[Manufacturer]
+%ProviderName% = RtThread,NTamd64
+
+[RtThread.NTamd64]
+%DeviceName% = USB_Install, USB\VID_28E9&PID_028F
+
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NTamd64.10.0
+
+[USB_Install.Services]
+Include    = winusb.inf
+AddService = WinUSB,0x00000002,WinUSB_ServiceInstall
+
+[WinUSB_ServiceInstall]
+DisplayName   = %ServiceName%
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 1
+ServiceBinary = %12%\WinUSB.sys
+
+[USB_Install.HW]
+AddReg = Dev_AddReg
+
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,"{729cf4ce-5c3a-11ed-9b6a-0242ac120002}"
+
+[Strings]
+ProviderName = "RT-Thread"
+ClassName    = "Windows USB Device"
+DeviceName   = "RTT Win USB"
+ServiceName  = "WinUSB"
